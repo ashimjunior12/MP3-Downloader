@@ -4,7 +4,7 @@
 Simple Script that downloads you a mp3 file.
 
 # How to use? 
-**Make sure you have ***python***, ***selenium***, ***beautiful soup*** and ***requests*** installed in your device.**
+**Make sure you have ***python***, ***selenium***, ***bs4*** and ***requests*** installed in your device.**
 
 * Run the Script.
 * Specify the name of the song you want to download.
