@@ -59,6 +59,7 @@ try:
 
 
 except:
+    driver.quit()
     print("Note: Please check your internet connection!!")
 
 
