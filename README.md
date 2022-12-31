@@ -7,7 +7,7 @@ Simple Script that downloads you a mp3 file.
 **Make sure you have ***python***, ***chromedriver***, ***selenium***, ***bs4*** and ***requests*** installed in your device.**
 
 * Check your google chrome version.
-* Download ***chromedriver.exe*** as per your goole chrome version.
+* Download ***chromedriver.exe*** as per your google chrome version.
 * Run the Script.
 * Specify the name of the song you want to download.
 * Wait for about 2 minutes.
