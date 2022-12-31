@@ -2,8 +2,9 @@ from bs4 import BeautifulSoup                       # pip install beautifulsoup4
 from time import sleep
 from selenium import webdriver                      # pip install selenium
 from selenium.webdriver.common.keys import Keys     # to enter key strokes and submit button
-import os, requests                                 # pip install requests
+import os, requests, warnings                       # pip install requests
 
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 mp3_website = 'https://ytmp3.nu/'
 
 try:
@@ -13,7 +14,10 @@ try:
 
     search_query = input('Enter the song name: ')
 
-    driver = webdriver.Chrome()
+    options = webdriver.ChromeOptions()
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+
+    driver = webdriver.Chrome(options=options)
     driver.get(url(search_query))                 
 
     def song_url(content):
@@ -29,8 +33,8 @@ except:
 try:
     def main(url):
         driver.get(url)
-        driver.find_element_by_xpath('//*[@id="url"]').send_keys(song_url(content_of_youtube))
-        driver.find_element_by_xpath('//*[@id="form"]/form/input[3]').click()
+        driver.find_element_by_xpath('.//*[@id="url"]').send_keys(song_url(content_of_youtube))
+        driver.find_element_by_xpath('.//*[@id="form"]/form/input[3]').click()
         sleep(4)
 
         content_of_mp3_website = driver.page_source.encode('utf-8').strip()
@@ -39,11 +43,11 @@ try:
         download_link = soup.find('div', {'id':'download'})
         song_download = download_link.find('a', href=True)
         content_to_be_download = song_download['href']
-        resoponse = requests.get(content_to_be_download)
-        print(resoponse)
+        resoponse = requests.get(content_to_be_download)        
         driver.quit()
+        print('File being downloaded....')
 
-        os.chdir('C:\\Users\\user_name\\Downloads')       # Specify the path where you want to download the file
+        os.chdir('C:\\Users\\User_name\\Downloads')       # Specify the path where you want to download.
 
         with open(f'{search_query}.mp3', 'wb') as file:
             for chunk in resoponse.iter_content():
