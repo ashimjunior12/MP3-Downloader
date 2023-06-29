@@ -1,69 +1,61 @@
-from bs4 import BeautifulSoup                       # pip install beautifulsoup4
-from time import sleep
-from selenium import webdriver                      # pip install selenium
-from selenium.webdriver.common.keys import Keys     # to enter key strokes and submit button
-import os, requests, warnings                       # pip install requests
+# pip install requests
+# pip install beautifulsoup4
+# pip install selenium
 
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
-mp3_website = 'https://ytmp3.nu/'
+import time
+import os
+import requests
+import warnings
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-try:
-    def url(song_name):
-        song_base_url = f'https://www.youtube.com/results?search_query={song_name}'
-        return song_base_url
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-    search_query = input('Enter the song name: ')
-
-    options = webdriver.ChromeOptions()
+def get_download_link(song_name):
+    options = Options()
+    options.add_argument("--headless")  # Enable headless mode
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    driver = webdriver.Chrome(options=options)
 
-    driver = webdriver.Chrome(options=options)          # Specify the executable path of the chromedriver
-    driver.get(url(search_query))                 
+    song_base_url = f'https://www.youtube.com/results?search_query={song_name}'
+    driver.get(song_base_url)
 
-    def song_url(content):
-        soup = BeautifulSoup(content, 'lxml')
-        link = soup.find('a', {'id':'video-title'})        
-        video_url = f"https://www.youtube.com/{link.get('href')}"      
-        return video_url
+    content_of_youtube = driver.page_source
+    soup = BeautifulSoup(content_of_youtube, 'lxml')
+    link = soup.find('a', {'id':'video-title'})
+    video_url = f"https://www.youtube.com{link.get('href')}"
 
-    content_of_youtube = driver.page_source.encode('utf-8').strip()      
-except:
-    pass
-
-try:
-    def main(url):
-        driver.get(url)
-        driver.find_element_by_xpath('.//*[@id="url"]').send_keys(song_url(content_of_youtube))
-        driver.find_element_by_xpath('.//*[@id="form"]/form/input[3]').click()
-        sleep(4)
-
-        content_of_mp3_website = driver.page_source.encode('utf-8').strip()
-        sleep(1)
-        soup = BeautifulSoup(content_of_mp3_website, 'lxml')
-        download_link = soup.find('div', {'id':'download'})
-        song_download = download_link.find('a', href=True)
-        content_to_be_download = song_download['href']
-        resoponse = requests.get(content_to_be_download)        
-        driver.quit()
-        print('File being downloaded....')
-
-        os.chdir('C:\\Users\\User_Name\\Downloads')          # Specify the path where you want to download.
-
-        with open(f'{search_query}.mp3', 'wb') as file:
-            for chunk in resoponse.iter_content():
-                file.write(chunk)
-
-        print(f'Successfully downloaded {search_query}.')
-
-    main(mp3_website)
-
-
-except:
     driver.quit()
-    print("Note: Please check your internet connection!!")
 
+    driver = webdriver.Chrome(options=options)
+    driver.get('https://ytmp3.nu/')
 
+    time.sleep(2)
+    url_input = driver.find_element('xpath', '//*[@id="url"]')
+    url_input.send_keys(video_url)
 
+    convert_button = driver.find_element('xpath', '/html/body/form/div[2]/input[3]')
+    convert_button.click()
 
+    wait = WebDriverWait(driver, 10)
+    download_button = wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@id="download"]/a')))
+    download_link = download_button.get_attribute('href')
 
+    driver.quit()
 
+    return download_link
+
+song_name = input("Enter the name of the song: ")
+download_link = get_download_link(song_name)
+response = requests.get(download_link)
+
+os.chdir("/home/ashim/Downloads/songs")      # Specify the path where you want to download the song.
+with open(f"{song_name}.mp3", "wb") as file:
+    for chunk in response.iter_content():
+        file.write(chunk)
+
+print("Audio Successfully downloaded.")
